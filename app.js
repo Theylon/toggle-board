@@ -11,6 +11,7 @@ const state = {
 };
 
 const cards = new Map();
+const visuals = new Map();
 
 function fmtMeta(isOn) {
   return isOn ? "WE’RE SO BACK" : "IT’S OVER";
@@ -48,6 +49,89 @@ function showToast(message) {
   }, 3200);
 }
 
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function getVisual(key) {
+  return visuals.get(key) || null;
+}
+
+function progressForState(isOn) {
+  return isOn ? 1 : 0;
+}
+
+function progressFromClientY(track, clientY) {
+  const rect = track.getBoundingClientRect();
+  const t = clamp01((clientY - rect.top) / rect.height);
+  return 1 - t;
+}
+
+function setHandleFromProgress(visual, progress) {
+  if (!visual?.track || !visual?.handle) return;
+  const rect = visual.track.getBoundingClientRect();
+  const top = 2;
+  const handleSize = 60;
+  const travel = Math.max(0, rect.height - handleSize - top);
+  const y = top + (1 - clamp01(progress)) * travel;
+  visual.handle.style.setProperty("--handleY", `${y}px`);
+}
+
+function setVideoFromProgress(visual, progress) {
+  const video = visual?.video;
+  if (!video) return;
+
+  const duration = Number.isFinite(video.duration) ? video.duration : 0;
+  if (!duration || duration <= 0) {
+    visual.pendingProgress = progress;
+    return;
+  }
+
+  // This Tenor asset reads happy -> sad; invert so top=happy, bottom=sad.
+  const desired = (1 - clamp01(progress)) * duration;
+  const safe = Math.max(0, Math.min(duration - 0.001, desired));
+  try {
+    video.pause();
+    video.currentTime = safe;
+  } catch {
+    // iOS/Safari can throw if seek is too early; keep pending.
+    visual.pendingProgress = progress;
+  }
+}
+
+function setVisualProgress(key, progress) {
+  const visual = getVisual(key);
+  if (!visual) return;
+  visual.progress = progress;
+  setHandleFromProgress(visual, progress);
+  setVideoFromProgress(visual, progress);
+}
+
+function animateVisualProgress(key, targetProgress, durationMs = 420) {
+  const visual = getVisual(key);
+  if (!visual) return;
+
+  const from = Number.isFinite(visual.progress) ? visual.progress : 0;
+  const to = clamp01(targetProgress);
+  if (Math.abs(from - to) < 0.001) {
+    setVisualProgress(key, to);
+    return;
+  }
+
+  const start = performance.now();
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
+
+  const tick = (now) => {
+    const t = clamp01((now - start) / durationMs);
+    const v = from + (to - from) * ease(t);
+    setVisualProgress(key, v);
+    if (t < 1 && !visual.dragging) visual.raf = requestAnimationFrame(tick);
+  };
+
+  if (visual.raf) cancelAnimationFrame(visual.raf);
+  visual.raf = requestAnimationFrame(tick);
+}
+
 function animateCard(key, kind) {
   const card = cards.get(key);
   if (!card) return;
@@ -80,6 +164,7 @@ function setTopic(key, nextOn, cause = "user") {
         renderTopic(toFlip);
         animateCard(toFlip, "bonk");
         showToast(`Capacity is 2 — BONK: flipped ${TOPIC_LABELS[toFlip]} to “IT’S OVER”.`);
+        animateVisualProgress(toFlip, 0, 520);
       }
     }
     entry.on = true;
@@ -90,7 +175,12 @@ function setTopic(key, nextOn, cause = "user") {
   }
 
   renderTopic(key);
-  if (cause !== "init") animateCard(key, nextOn ? "on" : "off");
+  if (cause !== "init") {
+    animateCard(key, nextOn ? "on" : "off");
+    animateVisualProgress(key, progressForState(nextOn), 460);
+  } else {
+    setVisualProgress(key, progressForState(nextOn));
+  }
 }
 
 function renderTopic(key) {
@@ -114,16 +204,75 @@ function wireCard(card) {
 
   const toggle = card.querySelector('[data-role="toggle"]');
   const track = card.querySelector('[data-role="track"]');
+  const handle = card.querySelector('[data-role="handle"]');
+  const video = card.querySelector('[data-role="pepeVid"]');
+  const img = card.querySelector('[data-role="pepeImg"]');
 
-  const setFromClientY = (clientY) => {
-    if (!track) return;
-    const rect = track.getBoundingClientRect();
-    const mid = rect.top + rect.height / 2;
-    setTopic(key, clientY < mid);
-  };
+  visuals.set(key, {
+    card,
+    track,
+    handle,
+    video,
+    img,
+    progress: 0,
+    dragging: false,
+    raf: null,
+    pendingProgress: null,
+    suppressClick: false,
+  });
+
+  video?.addEventListener("loadedmetadata", () => {
+    card.dataset.pepe = "video";
+    const visual = getVisual(key);
+    if (!visual) return;
+    const p = visual.pendingProgress ?? visual.progress ?? progressForState(state[key].on);
+    visual.pendingProgress = null;
+    setVideoFromProgress(visual, p);
+  });
+  video?.addEventListener("error", () => {
+    card.dataset.pepe = "gif";
+  });
 
   track?.addEventListener("click", (e) => {
-    setFromClientY(e.clientY);
+    const visual = getVisual(key);
+    if (visual?.suppressClick) return;
+    const progress = progressFromClientY(track, e.clientY);
+    setTopic(key, progress >= 0.5);
+  });
+
+  track?.addEventListener("pointerdown", (e) => {
+    if (!track) return;
+    const visual = getVisual(key);
+    if (!visual) return;
+    visual.suppressClick = true;
+    visual.dragging = true;
+    if (visual.raf) cancelAnimationFrame(visual.raf);
+
+    track.setPointerCapture?.(e.pointerId);
+    const progress = progressFromClientY(track, e.clientY);
+    setVisualProgress(key, progress);
+
+    const move = (ev) => {
+      const p = progressFromClientY(track, ev.clientY);
+      setVisualProgress(key, p);
+    };
+
+    const up = (ev) => {
+      track.removeEventListener("pointermove", move);
+      track.removeEventListener("pointerup", up);
+      track.removeEventListener("pointercancel", up);
+
+      const finalProgress = progressFromClientY(track, ev.clientY);
+      visual.dragging = false;
+      window.setTimeout(() => {
+        visual.suppressClick = false;
+      }, 0);
+      setTopic(key, finalProgress >= 0.5);
+    };
+
+    track.addEventListener("pointermove", move);
+    track.addEventListener("pointerup", up);
+    track.addEventListener("pointercancel", up);
   });
 
   toggle?.addEventListener("keydown", (e) => {
@@ -135,6 +284,7 @@ function wireCard(card) {
   });
 
   renderTopic(key);
+  setVisualProgress(key, progressForState(state[key].on));
 }
 
 function setPepeFallbacks() {
@@ -158,10 +308,14 @@ function setPepeFallbacks() {
     </svg>`
   );
 
-  for (const img of document.querySelectorAll(".pepeImg")) {
-    img.addEventListener("error", () => {
+  for (const card of document.querySelectorAll(".card")) {
+    const img = card.querySelector('[data-role="pepeImg"]');
+
+    img?.addEventListener("error", () => {
       img.src = `data:image/svg+xml;charset=utf-8,${fallbackSvg}`;
     });
+    // Default to GIF until per-card video metadata loads.
+    card.dataset.pepe = "gif";
   }
 }
 

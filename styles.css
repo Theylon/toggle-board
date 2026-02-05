@@ -221,7 +221,9 @@ body::before{
   place-items:center;
 }
 
+.pepeVid,
 .pepeImg{
+  grid-area: 1 / 1;
   width: calc(var(--pepeSize) * 1.18);
   height: calc(var(--pepeSize) * 1.18);
   object-fit: contain;
@@ -229,11 +231,32 @@ body::before{
   transition: transform 420ms cubic-bezier(.16,.9,.22,1);
 }
 
+.pepeVid{
+  opacity: 0;
+  pointer-events:none;
+}
+.card[data-pepe="video"] .pepeVid{ opacity: 1; }
+.card[data-pepe="video"] .pepeImg{ opacity: 0; }
+
+.pepeImg{
+  pointer-events:none;
+}
+
 .card[data-state="on"] .pepeImg{
   --pepeShift: -10px;
   --pepeTilt: -2deg;
 }
 .card[data-state="off"] .pepeImg{
+  --pepeShift: 12px;
+  --pepeTilt: 1deg;
+  filter: saturate(.92) brightness(.96);
+}
+
+.card[data-state="on"] .pepeVid{
+  --pepeShift: -10px;
+  --pepeTilt: -2deg;
+}
+.card[data-state="off"] .pepeVid{
   --pepeShift: 12px;
   --pepeTilt: 1deg;
   filter: saturate(.92) brightness(.96);

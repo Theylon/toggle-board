@@ -9,7 +9,11 @@ Rule: at most **two** can be set to **WE’RE SO BACK** at the same time (turnin
 
 ## Pepe asset
 
-The UI expects a local GIF at `assets/pepe.gif`. If it’s missing, the page falls back to a built-in placeholder.
+The UI uses:
+- `assets/pepe.mp4` for “scrubbing” the animation forward/back based on toggle position
+- `assets/pepe.gif` as a fallback if video fails
+
+If either is missing, the page falls back to a built-in placeholder.
 
 ## Run
 
