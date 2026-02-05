@@ -18,7 +18,7 @@
 
   --r: 18px;
 
-  --pepeSize: 140px;
+  --pepeSize: 160px; /* treated as width */
   --toggleH: 240px;
   --toggleW: 70px;
 }
@@ -113,13 +113,14 @@ body::before{
 
 @media (max-width: 420px){
   :root{
-    --pepeSize: 124px;
+    --pepeSize: 146px;
     --toggleH: 224px;
   }
 }
 
 .card{
   position:relative;
+  isolation:isolate;
   padding:18px 16px 18px;
   border-radius:var(--r);
   background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
@@ -133,6 +134,7 @@ body::before{
   content:"";
   position:absolute;
   inset:-2px;
+  z-index:0;
   pointer-events:none;
   background:
     radial-gradient(600px 240px at 12% 10%, rgba(125,255,185,.14), transparent 60%),
@@ -142,6 +144,13 @@ body::before{
 }
 
 .card[data-state="on"]::after{opacity:1}
+
+.cardTop,
+.cardBody,
+.stamp{
+  position:relative;
+  z-index:1;
+}
 
 .card.pulseOn{ animation: pulseOn 520ms ease-out; }
 .card.pulseOff{ animation: pulseOff 520ms ease-out; }
@@ -236,8 +245,9 @@ body::before{
 
 .pepeWindow{
   width: var(--pepeSize);
-  height: var(--pepeSize);
-  border-radius: 22px;
+  height: auto;
+  aspect-ratio: 220 / 194;
+  border-radius: 12px;
   border: 1px solid rgba(0,0,0,.14);
   background: #ffffff;
   box-shadow:
@@ -246,7 +256,6 @@ body::before{
   overflow:hidden;
   display:grid;
   place-items:center;
-  padding: 8px;
 }
 
 .pepeVid,
@@ -255,8 +264,9 @@ body::before{
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
   display:block;
-  transform: translateY(var(--pepeNudge, 0px));
+  transform: translateY(0);
   transition: transform 420ms cubic-bezier(.16,.9,.22,1);
 }
 
@@ -271,8 +281,8 @@ body::before{
   pointer-events:none;
 }
 
-.card[data-state="on"]{ --pepeNudge: -2px; }
-.card[data-state="off"]{ --pepeNudge: 2px; }
+.card[data-state="on"]{ }
+.card[data-state="off"]{ }
 
 .pepeHint{
   margin:0;
