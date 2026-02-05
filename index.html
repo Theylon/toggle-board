@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Two-Up Toggles</title>
+    <meta name="color-scheme" content="dark" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <p class="kicker">Sentiment board</p>
+        <h1 class="title">Only two can be back.</h1>
+        <p class="sub">
+          Flip any topic to <span class="pill on">WE’RE SO BACK</span>. If that makes three, the
+          oldest “back” flips to <span class="pill off">IT’S OVER</span>.
+        </p>
+      </header>
+
+      <section class="grid" aria-label="Toggles">
+        <article class="card" data-key="ai">
+          <div class="cardTop">
+            <h2 class="cardTitle">AI</h2>
+            <p class="cardMeta" data-role="meta">—</p>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="AI toggle">
+            <button class="segBtn" type="button" role="radio" data-value="off">IT’S OVER</button>
+            <button class="segBtn" type="button" role="radio" data-value="on">WE’RE SO BACK</button>
+          </div>
+        </article>
+
+        <article class="card" data-key="crypto">
+          <div class="cardTop">
+            <h2 class="cardTitle">Crypto</h2>
+            <p class="cardMeta" data-role="meta">—</p>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="Crypto toggle">
+            <button class="segBtn" type="button" role="radio" data-value="off">IT’S OVER</button>
+            <button class="segBtn" type="button" role="radio" data-value="on">WE’RE SO BACK</button>
+          </div>
+        </article>
+
+        <article class="card" data-key="war">
+          <div class="cardTop">
+            <h2 class="cardTitle">War in the Middle East</h2>
+            <p class="cardMeta" data-role="meta">—</p>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="War in the Middle East toggle">
+            <button class="segBtn" type="button" role="radio" data-value="off">IT’S OVER</button>
+            <button class="segBtn" type="button" role="radio" data-value="on">WE’RE SO BACK</button>
+          </div>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <p class="footerText">
+          Tip: use <kbd>Tab</kbd> then <kbd>←</kbd>/<kbd>→</kbd> to switch.
+        </p>
+      </footer>
+    </main>
+
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <span class="toastMsg" data-role="toastMsg"></span>
+      <button class="toastClose" type="button" aria-label="Dismiss">✕</button>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
