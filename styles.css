@@ -18,7 +18,7 @@
 
   --r: 18px;
 
-  --pepeSize: 106px;
+  --pepeSize: 140px;
   --toggleH: 240px;
   --toggleW: 70px;
 }
@@ -33,7 +33,7 @@ body{
     radial-gradient(900px 650px at 80% 20%, rgba(123,211,255,.10), transparent 60%),
     radial-gradient(1000px 700px at 50% 100%, rgba(255,210,122,.08), transparent 55%),
     linear-gradient(180deg, var(--bg1), var(--bg0));
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 body::before{
@@ -76,6 +76,8 @@ body::before{
   line-height:1.05;
   font-weight:820;
   text-wrap:balance;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  letter-spacing: .02em;
 }
 
 .sub{
@@ -107,6 +109,13 @@ body::before{
 
 @media (max-width: 900px){
   .grid{grid-template-columns: 1fr}
+}
+
+@media (max-width: 420px){
+  :root{
+    --pepeSize: 124px;
+    --toggleH: 224px;
+  }
 }
 
 .card{
@@ -170,6 +179,8 @@ body::before{
   font-weight:800;
   letter-spacing:.01em;
   font-size:18px;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  letter-spacing: .03em;
 }
 
 .cardMeta{
@@ -185,6 +196,13 @@ body::before{
   align-items:center;
   justify-content:space-between;
   gap:14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f4f4f4);
+  border: 1px solid rgba(0,0,0,.12);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.75);
 }
 
 .pepeWrap{
@@ -205,7 +223,7 @@ body::before{
     radial-gradient(100px 80px at 50% 30%, rgba(125,255,185,.18), transparent 70%),
     radial-gradient(120px 90px at 50% 10%, rgba(123,211,255,.14), transparent 72%);
   filter: blur(1px);
-  opacity:.9;
+  opacity:.55;
   pointer-events:none;
 }
 
@@ -213,21 +231,25 @@ body::before{
   width: var(--pepeSize);
   height: var(--pepeSize);
   border-radius: 22px;
-  border: 1px solid rgba(43,49,82,.75);
-  background: rgba(255,255,255,.03);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  border: 1px solid rgba(0,0,0,.14);
+  background: #ffffff;
+  box-shadow:
+    0 16px 44px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.55);
   overflow:hidden;
   display:grid;
   place-items:center;
+  padding: 8px;
 }
 
 .pepeVid,
 .pepeImg{
   grid-area: 1 / 1;
-  width: calc(var(--pepeSize) * 1.18);
-  height: calc(var(--pepeSize) * 1.18);
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  transform: translateY(var(--pepeShift, 10px)) rotate(var(--pepeTilt, 0deg));
+  display:block;
+  transform: translateY(var(--pepeNudge, 0px));
   transition: transform 420ms cubic-bezier(.16,.9,.22,1);
 }
 
@@ -242,30 +264,13 @@ body::before{
   pointer-events:none;
 }
 
-.card[data-state="on"] .pepeImg{
-  --pepeShift: -10px;
-  --pepeTilt: -2deg;
-}
-.card[data-state="off"] .pepeImg{
-  --pepeShift: 12px;
-  --pepeTilt: 1deg;
-  filter: saturate(.92) brightness(.96);
-}
-
-.card[data-state="on"] .pepeVid{
-  --pepeShift: -10px;
-  --pepeTilt: -2deg;
-}
-.card[data-state="off"] .pepeVid{
-  --pepeShift: 12px;
-  --pepeTilt: 1deg;
-  filter: saturate(.92) brightness(.96);
-}
+.card[data-state="on"]{ --pepeNudge: -2px; }
+.card[data-state="off"]{ --pepeNudge: 2px; }
 
 .pepeHint{
   margin:0;
   font-size:11px;
-  color: rgba(141,148,191,.9);
+  color: rgba(0,0,0,.62);
   letter-spacing:.22em;
   text-transform:uppercase;
   opacity:.75;
@@ -289,26 +294,26 @@ body::before{
   font-size:12px;
   letter-spacing:.10em;
   text-transform:uppercase;
-  color: rgba(176,182,218,.92);
+  color: rgba(0,0,0,.72);
   user-select:none;
   text-align:center;
   max-width: 16ch;
   text-wrap:balance;
 }
-.vTop{ color: rgba(125,255,185,.88); }
-.vBottom{ color: rgba(208,213,240,.82); }
+.vTop{ color: rgba(4,84,52,.90); }
+.vBottom{ color: rgba(0,0,0,.60); }
 
 .track{
   position:relative;
   width: var(--toggleW);
   height: var(--toggleH);
   border-radius: 999px;
-  border: 1px solid rgba(34,38,64,.95);
-  background:
-    radial-gradient(180px 220px at 50% 10%, rgba(125,255,185,.08), transparent 55%),
-    radial-gradient(180px 220px at 50% 90%, rgba(136,144,182,.10), transparent 55%),
-    linear-gradient(180deg, rgba(12,14,24,.85), rgba(8,8,12,.72));
-  box-shadow: 0 12px 34px rgba(0,0,0,.35);
+  border: 1px solid rgba(0,0,0,.16);
+  background: linear-gradient(180deg, #ffffff, #f2f2f2);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.36),
+    inset 0 2px 0 rgba(255,255,255,.75),
+    inset 0 -10px 24px rgba(0,0,0,.05);
   overflow:hidden;
   cursor:pointer;
   touch-action: none;
@@ -322,6 +327,7 @@ body::before{
     radial-gradient(140px 210px at 50% 28%, rgba(123,211,255,.22), transparent 62%);
   opacity:0;
   transition: opacity 240ms ease;
+  mix-blend-mode: multiply;
 }
 .card[data-state="on"] .trackFill{ opacity:1; }
 
@@ -333,12 +339,12 @@ body::before{
   border-radius: 999px;
   transform: translate(-50%, var(--handleY, calc(var(--toggleH) - 62px)));
   background:
-    radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.26), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-  border: 1px solid rgba(255,255,255,.10);
+    radial-gradient(18px 18px at 30% 30%, rgba(0,0,0,.06), transparent 55%),
+    linear-gradient(180deg, #ffffff, #e9e9e9);
+  border: 1px solid rgba(0,0,0,.18);
   box-shadow:
     0 18px 40px rgba(0,0,0,.45),
-    inset 0 1px 0 rgba(255,255,255,.12);
+    inset 0 1px 0 rgba(255,255,255,.72);
   transition:
     transform 520ms cubic-bezier(.16,.95,.12,1),
     background 220ms ease,
@@ -346,15 +352,19 @@ body::before{
 }
 
 .card[data-state="on"] .handle{
-  --handleY: 2px;
-  background:
-    radial-gradient(22px 22px at 30% 30%, rgba(255,255,255,.30), transparent 58%),
-    linear-gradient(180deg, rgba(125,255,185,.92), rgba(123,211,255,.72));
-  border-color: rgba(125,255,185,.28);
+  border-color: rgba(0,0,0,.20);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.45),
+    0 0 0 3px rgba(125,255,185,.22),
+    0 0 18px rgba(123,211,255,.22),
+    inset 0 1px 0 rgba(255,255,255,.78);
 }
 
 .card[data-state="off"] .handle{
-  --handleY: calc(var(--toggleH) - 62px);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.45),
+    0 0 0 3px rgba(0,0,0,.06),
+    inset 0 1px 0 rgba(255,255,255,.72);
 }
 
 .track:active .handle{
